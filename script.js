@@ -1,149 +1,111 @@
-const $=(s,c=document)=>c.querySelector(s);
-const $$=(s,c=document)=>[...c.querySelectorAll(s)];
-const WISH_KEY='samir_menna_wishes_v3';
-const RSVP_KEY='samir_menna_rsvps_v3';
-const prelude=$('#prelude');
-const envelopeStage=$('#envelopeStage');
-const envelope=$('.envelope');
-const site=$('#site');
-const music=$('#weddingMusic');
-const musicToggle=$('#musicToggle');
-const guestbookTrack=$('#guestbookTrack');
-const clean=(s='')=>String(s).trim().replace(/\s+/g,' ');
-const getStore=k=>{try{return JSON.parse(localStorage.getItem(k)||'[]')}catch{return[]}};
-const setStore=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
+const $ = (selector, root = document) => root.querySelector(selector);
+const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
+const wedding = window.WEDDING;
+const opening = $('#opening');
+const invitation = $('#invitation');
+const envelope = $('#openInvitation');
+const audio = $('#weddingMusic');
+const musicToggle = $('#musicToggle');
 
-function switchScreen(from,to,delay=280){
-  from.classList.remove('active');
-  from.setAttribute('aria-hidden','true');
-  setTimeout(()=>{
-    to.classList.add('active');
-    to.setAttribute('aria-hidden','false');
-  },delay);
+function applyWeddingData() {
+  const { personOne, personTwo } = wedding.couple;
+  $('#openingNameOne').textContent = personOne;
+  $('#openingNameTwo').textContent = personTwo;
+  $$('[data-name="one"]').forEach((el) => { el.textContent = personOne; });
+  $$('[data-name="two"]').forEach((el) => { el.textContent = personTwo; });
+  $('#ceremonyTime').textContent = wedding.ceremony.time;
+  $('#venueName').textContent = wedding.ceremony.venue;
+  $('#venueAddress').textContent = wedding.ceremony.address;
+  $('#mapsLink').href = wedding.ceremony.mapsUrl;
+  $('#songTitle').textContent = wedding.song.title;
+  audio.src = wedding.song.audioSrc;
+  $('#dressCode').textContent = wedding.dressCode;
+  $('#giftMessage').textContent = wedding.giftMessage;
+  $('#adultsMessage').textContent = wedding.adultsOnly;
+  $('#timeline').innerHTML = wedding.itinerary.map((item, index) =>
+    `<div class="timeline-row" style="transition-delay:${index * 90 + 300}ms"><time>${item.time}</time><i aria-hidden="true">${item.icon}</i><span>${item.label}</span></div>`
+  ).join('');
 }
 
-function addWish(name,message){
-  const rows=getStore(WISH_KEY);
-  rows.unshift({name:clean(name),message:clean(message),createdAt:new Date().toISOString()});
-  setStore(WISH_KEY,rows.slice(0,100));
-  renderWishes();
+function revealSite() {
+  opening.classList.add('opened');
+  invitation.classList.add('active');
+  invitation.setAttribute('aria-hidden', 'false');
+  document.body.classList.remove('is-locked');
+  requestAnimationFrame(() => $$('.reveal').forEach((el) => observer.observe(el)));
 }
 
-function renderWishes(){
-  const rows=getStore(WISH_KEY);
-  const data=rows.length?rows:[{name:'Samir & Menna',message:'سيبولنا دعوة حلوة نفتكرها منكم دايمًا.',createdAt:new Date().toISOString()}];
-  guestbookTrack.innerHTML='';
-  data.forEach(w=>{
-    const card=document.createElement('article'); card.className='wish-card';
-    const n=document.createElement('strong'); n.textContent=w.name;
-    const p=document.createElement('p'); p.textContent='“'+w.message+'”';
-    const t=document.createElement('time');
-    t.textContent=new Date(w.createdAt).toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'});
-    card.append(n,p,t); guestbookTrack.append(card);
-  });
-}
-
-function goEnvelope(){switchScreen(prelude,envelopeStage)}
-$('#openingWishForm').addEventListener('submit',e=>{
-  e.preventDefault();
-  addWish($('#openingName').value,$('#openingMessage').value);
-  goEnvelope();
-});
-$('#skipWish').addEventListener('click',goEnvelope);
-
-$('#sealButton').addEventListener('click',async()=>{
-  if(envelope.classList.contains('open')) return;
+envelope.addEventListener('click', () => {
+  if (envelope.classList.contains('open')) return;
   envelope.classList.add('open');
-  await startMusic();
-  setTimeout(()=>enterInvitation(),1050);
+  setTimeout(revealSite, 1450);
 });
 
-function enterInvitation(){
-  envelopeStage.classList.remove('active');
-  envelopeStage.setAttribute('aria-hidden','true');
-  site.classList.add('active');
-  site.setAttribute('aria-hidden','false');
-  document.body.classList.remove('locked');
-  window.scrollTo(0,0);
-  requestAnimationFrame(()=>$$('.reveal-text,.reveal-photo').forEach(el=>io.observe(el)));
-}
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach((entry) => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('in');
+      observer.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.16, rootMargin: '0px 0px -7% 0px' });
 
-async function startMusic(){
-  try{
-    music.volume=.72;
-    await music.play();
-    musicToggle.setAttribute('aria-pressed','true');
-    musicToggle.querySelector('span').textContent='ON';
-  }catch{
-    musicToggle.setAttribute('aria-pressed','false');
-    musicToggle.querySelector('span').textContent='OFF';
+async function toggleMusic() {
+  if (audio.paused) {
+    try {
+      await audio.play();
+      musicToggle.setAttribute('aria-pressed', 'true');
+      musicToggle.querySelector('span').textContent = 'Ⅱ';
+    } catch { /* playback remains user-controlled */ }
+  } else {
+    audio.pause();
+    musicToggle.setAttribute('aria-pressed', 'false');
+    musicToggle.querySelector('span').textContent = '▶';
   }
 }
-
-
-musicToggle.addEventListener('click',async()=>{
-  if(music.paused){
-    try{await music.play();musicToggle.setAttribute('aria-pressed','true');musicToggle.querySelector('span').textContent='ON'}catch{}
-  }else{
-    music.pause();musicToggle.setAttribute('aria-pressed','false');musicToggle.querySelector('span').textContent='OFF';
-  }
+musicToggle.addEventListener('click', toggleMusic);
+$$('[data-skip]').forEach((button) => button.addEventListener('click', () => {
+  audio.currentTime = Math.max(0, Math.min(audio.duration || 0, audio.currentTime + Number(button.dataset.skip)));
+}));
+audio.addEventListener('timeupdate', () => {
+  $('#musicProgress').style.width = audio.duration ? `${(audio.currentTime / audio.duration) * 100}%` : '0%';
 });
 
-function countdown(){
-  const target=new Date('2026-10-23T16:00:00+03:00').getTime();
-  let d=Math.max(0,target-Date.now());
-  const days=Math.floor(d/86400000); d%=86400000;
-  const hours=Math.floor(d/3600000); d%=3600000;
-  const minutes=Math.floor(d/60000); d%=60000;
-  const seconds=Math.floor(d/1000);
-  $('#days').textContent=String(days).padStart(3,'0');
-  $('#hours').textContent=String(hours).padStart(2,'0');
-  $('#minutes').textContent=String(minutes).padStart(2,'0');
-  $('#seconds').textContent=String(seconds).padStart(2,'0');
+function updateCountdown() {
+  const remaining = Math.max(0, new Date(wedding.date).getTime() - Date.now());
+  const days = Math.floor(remaining / 86400000);
+  const hours = Math.floor((remaining / 3600000) % 24);
+  const minutes = Math.floor((remaining / 60000) % 60);
+  const seconds = Math.floor((remaining / 1000) % 60);
+  $('#days').textContent = String(days).padStart(3, '0');
+  $('#hours').textContent = String(hours).padStart(2, '0');
+  $('#minutes').textContent = String(minutes).padStart(2, '0');
+  $('#seconds').textContent = String(seconds).padStart(2, '0');
 }
-countdown(); setInterval(countdown,1000);
 
-$('#wishForm').addEventListener('submit',e=>{
-  e.preventDefault();
-  const fd=new FormData(e.currentTarget);
-  addWish(fd.get('name'),fd.get('message'));
-  e.currentTarget.reset();
-  guestbookTrack.scrollTo({left:0,behavior:'smooth'});
+const rsvpForm = $('#rsvpForm');
+$('#showRsvp').addEventListener('click', () => {
+  rsvpForm.hidden = false;
+  rsvpForm.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  rsvpForm.querySelector('input').focus({ preventScroll: true });
 });
-
-$('#rsvpForm').addEventListener('submit',e=>{
-  e.preventDefault();
-  const fd=new FormData(e.currentTarget); const rows=getStore(RSVP_KEY);
-  rows.unshift({name:clean(fd.get('name')),attendance:fd.get('attendance'),message:clean(fd.get('message')||''),createdAt:new Date().toISOString()});
-  setStore(RSVP_KEY,rows);
-  e.currentTarget.reset();
-  $('#rsvpStatus').textContent='Thank you — تم تسجيل ردكم.';
-});
-
-const io=new IntersectionObserver(entries=>entries.forEach(entry=>{
-  if(entry.isIntersecting){entry.target.classList.add('in');io.unobserve(entry.target)}
-}),{threshold:.13,rootMargin:'0px 0px -5%'});
-
-const lightbox=$('#lightbox'),lightboxImage=$('#lightboxImage');
-$$('.gallery-shot').forEach(btn=>btn.addEventListener('click',()=>{lightboxImage.src=btn.querySelector('img').src;lightbox.showModal()}));
-$('#closeLightbox').addEventListener('click',()=>lightbox.close());
-
-const shareDialog=$('#shareDialog');
-$('#shareBtn').addEventListener('click',async()=>{
-  if(navigator.share){
-    try{await navigator.share({title:'Samir & Menna — 23 • 10 • 2026',text:'Join us as we celebrate our wedding.',url:location.href});return}catch{}
+$('#closeRsvp').addEventListener('click', () => { rsvpForm.hidden = true; });
+rsvpForm.addEventListener('submit', (event) => {
+  event.preventDefault();
+  const data = Object.fromEntries(new FormData(rsvpForm));
+  const clean = (value = '') => String(value).trim().replace(/\s+/g, ' ');
+  const record = { name: clean(data.name), attendance: data.attendance, message: clean(data.message), savedAt: new Date().toISOString() };
+  try {
+    const rows = JSON.parse(localStorage.getItem(wedding.rsvp.storageKey) || '[]');
+    rows.push(record);
+    localStorage.setItem(wedding.rsvp.storageKey, JSON.stringify(rows));
+    $('#rsvpStatus').textContent = 'Your reply has been saved on this device. Thank you.';
+    rsvpForm.reset();
+  } catch {
+    $('#rsvpStatus').textContent = 'Please contact the couple directly with your reply.';
   }
-  shareDialog.showModal();
-});
-$('#closeShare').addEventListener('click',()=>shareDialog.close());
-$('#whatsappShare').href='https://wa.me/?text='+encodeURIComponent('Samir & Menna — 23 • 10 • 2026\n'+location.href);
-$('#copyLink').addEventListener('click',async()=>{
-  try{await navigator.clipboard.writeText(location.href);$('#copyLink').querySelector('span').textContent='COPIED';setTimeout(()=>$('#copyLink').querySelector('span').textContent='COPY LINK',1200)}catch{}
 });
 
-$('#adminExport').addEventListener('click',()=>{
-  const blob=new Blob([JSON.stringify({rsvps:getStore(RSVP_KEY),wishes:getStore(WISH_KEY),exportedAt:new Date().toISOString()},null,2)],{type:'application/json'});
-  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='samir-menna-rsvp-export.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500);
-});
-
-renderWishes();
+applyWeddingData();
+updateCountdown();
+setInterval(updateCountdown, 1000);
