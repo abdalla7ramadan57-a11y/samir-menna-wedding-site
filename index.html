@@ -17,13 +17,14 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Italianno&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=9">
+  <link rel="stylesheet" href="styles.css?v=10">
 </head>
 <body class="is-locked">
   <div class="grain" aria-hidden="true"></div>
 
   <section class="opening" id="opening" aria-label="Open the wedding invitation">
     <button class="antique-frame" id="openInvitation" type="button" aria-label="Enter Samir and Menna's wedding invitation">
+      <img class="frame-art" src="assets/generated/antique-frame.webp" alt="Ornate antique-gold frame">
       <span class="frame-flourish frame-top" aria-hidden="true">❦</span><span class="frame-flourish frame-left" aria-hidden="true">❧</span><span class="frame-flourish frame-right" aria-hidden="true">❧</span>
       <span class="frame-inner"><small>Together with their families</small><strong><span id="openingNameOne">Samir</span><i>&amp;</i><span id="openingNameTwo">Menna</span></strong><em>23 · 10 · 2026</em><b>♥</b></span>
     </button>
@@ -36,7 +37,7 @@
       <div class="rose-corner rose-one" aria-hidden="true"></div><div class="rose-corner rose-two" aria-hidden="true"></div>
       <article class="envelope-invite reveal">
         <div class="invite-card torn-bottom"><p class="kicker">DEAR FRIENDS &amp; FAMILY</p><p>With joy in our hearts, we invite you to share the day our forever begins.</p><h2><span data-name="one">Samir</span> <i>&amp;</i> <span data-name="two">Menna</span></h2><p class="arabic" dir="rtl">نتشرف بوجودكم معانا ومشاركتنا أجمل يوم في حياتنا.</p></div>
-        <div class="envelope-pocket"></div><span class="wax-seal">S <i>&amp;</i> M</span>
+        <div class="envelope-pocket"></div><img class="wax-seal" src="assets/generated/wax-seal.webp" alt="Burgundy wax seal embossed with S and M">
       </article>
       <article class="music-strip torn-all reveal"><span><b>Our song</b><small id="songTitle">Our wedding song</small></span><div class="music-buttons"><button type="button" data-skip="-10" aria-label="Rewind ten seconds">↶</button><button id="musicToggle" type="button" aria-label="Play our song" aria-pressed="false">▶</button><button type="button" data-skip="10" aria-label="Forward ten seconds">↷</button></div><div class="music-progress"><span id="musicProgress"></span></div></article>
     </section>
@@ -45,9 +46,9 @@
       <header class="paper-heading reveal"><p class="kicker">FRIDAY · 23 OCTOBER 2026</p><h2>Program of the day</h2><span>♥ ♥ ♥</span></header>
       <div class="program-layout">
         <div class="timeline" id="timeline"></div>
-        <div class="hourglass reveal" aria-hidden="true"><span class="glass top-glass"></span><span class="glass bottom-glass"></span><i></i></div>
+        <img class="hourglass reveal" src="assets/generated/hourglass.webp" alt="Vintage carved-wood hourglass">
       </div>
-      <div class="castle-reveal reveal" aria-label="Romantic European manor illustration"><div class="tower tower-a"></div><div class="tower tower-b"></div><div class="manor-main"></div><div class="mist"></div></div>
+      <div class="castle-reveal reveal"><img class="castle-art" src="assets/generated/castle.webp" alt="Romantic candlelit European manor"><div class="mist"></div></div>
     </section>
 
     <section class="paper-section locations-section torn-both" id="locations">
@@ -61,12 +62,12 @@
     <section class="crimson-section dress-section" id="dress-code">
       <header class="red-heading reveal"><p class="kicker">A LITTLE STYLE NOTE</p><h2>Dress code</h2><p>Elegant evening attire in rich, timeless tones.</p></header>
       <div class="mirror-pair">
-        <article class="mirror mirror-her reveal"><div class="mirror-glass wine-fabric"></div><h3>For Her</h3><p id="dressWomen">Burgundy · Wine · Romantic neutrals</p></article>
-        <article class="mirror mirror-him reveal"><div class="mirror-glass dark-fabric"></div><h3>For Him</h3><p id="dressMen">Black · Charcoal · Deep neutrals</p></article>
+        <article class="mirror mirror-her reveal"><div class="mirror-visual"><div class="mirror-glass wine-fabric"></div><img class="mirror-frame-art" src="assets/generated/mirror-frame.webp" alt="Antique gold mirror frame"></div><h3>For Her</h3><p id="dressWomen">Burgundy · Wine · Romantic neutrals</p></article>
+        <article class="mirror mirror-him reveal"><div class="mirror-visual"><div class="mirror-glass dark-fabric"></div><img class="mirror-frame-art" src="assets/generated/mirror-frame.webp" alt="Antique gold mirror frame"></div><h3>For Him</h3><p id="dressMen">Black · Charcoal · Deep neutrals</p></article>
       </div>
     </section>
 
-    <div class="floral-divider" aria-hidden="true"><img src="assets/decor/floral-a.png" alt=""><img src="assets/decor/floral-a.png" alt=""><span>♥</span></div>
+    <div class="floral-divider" aria-hidden="true"><img src="assets/generated/floral-divider.webp" alt=""><span>♥</span></div>
 
     <section class="paper-section wishes-section torn-both">
       <article class="wishes-copy reveal"><p class="kicker">WITH ALL OUR LOVE</p><h2>Wishes</h2><p id="giftMessage">Your presence and warm wishes are the loveliest gifts we could receive.</p><span>♥ ♥ ♥</span><p class="arabic" dir="rtl">وجودكم معانا هو أجمل هدية.</p></article>
@@ -84,9 +85,9 @@
     </section>
 
     <section class="closing-garden">
-      <div class="garden-arch reveal" aria-hidden="true"><span class="arch-post left-post"></span><span class="arch-post right-post"></span><span class="arch-top"></span><i class="lantern lantern-left">✦</i><i class="lantern lantern-right">✦</i></div>
+      <img class="garden-arch reveal" src="assets/generated/garden-arch.webp" alt="Rose-covered antique garden arch with hanging lanterns">
       <article class="final-message reveal"><p class="script-line">We will be so happy to share this important day with you.</p><h2><span data-name="one">Samir</span> <i>&amp;</i> <span data-name="two">Menna</span></h2><p>23 · OCTOBER · 2026</p></article>
-      <div class="rose-garden" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
+      <div class="rose-garden" aria-hidden="true"><img src="assets/generated/rose-garden.webp" alt=""></div>
     </section>
   </main>
 
