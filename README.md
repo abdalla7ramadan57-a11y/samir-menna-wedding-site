@@ -3,11 +3,12 @@
 Mobile-first bilingual wedding invitation for Friday, 23 October 2026.
 
 ## Current flow
-1. Sealed burgundy envelope with wax-seal interaction
-2. Editorial portrait, music card and invitation letter
-3. Save-the-date calendar and working countdown
-4. Ceremony details, itinerary, dress code and gift note
-5. RSVP envelope, local reply form and closing stationery
+1. Antique gold framed announcement
+2. Burgundy envelope, wax seal, invitation and music strip
+3. Animated day program with hourglass and manor reveal
+4. Ceremony/reception locations and antique-mirror dress code
+5. Wishes, working countdown, RSVP and coordinator section
+6. Gothic garden arch and layered rose ending
 
 ## Files
 - `index.html` — markup and content

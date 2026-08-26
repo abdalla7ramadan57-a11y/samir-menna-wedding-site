@@ -3,7 +3,7 @@ const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
 const wedding = window.WEDDING;
 const opening = $('#opening');
 const invitation = $('#invitation');
-const envelope = $('#openInvitation');
+const frame = $('#openInvitation');
 const audio = $('#weddingMusic');
 const musicToggle = $('#musicToggle');
 
@@ -13,21 +13,35 @@ function applyWeddingData() {
   $('#openingNameTwo').textContent = personTwo;
   $$('[data-name="one"]').forEach((el) => { el.textContent = personOne; });
   $$('[data-name="two"]').forEach((el) => { el.textContent = personTwo; });
-  $('#ceremonyTime').textContent = wedding.ceremony.time;
-  $('#venueName').textContent = wedding.ceremony.venue;
-  $('#venueAddress').textContent = wedding.ceremony.address;
-  $('#mapsLink').href = wedding.ceremony.mapsUrl;
-  $('#songTitle').textContent = wedding.song.title;
-  audio.src = wedding.song.audioSrc;
-  $('#dressCode').textContent = wedding.dressCode;
+  const ceremony = wedding.venues.ceremony;
+  const reception = wedding.venues.reception;
+  $('#ceremonyName').textContent = ceremony.name;
+  $('#ceremonyAddress').textContent = ceremony.address;
+  $('#ceremonyMap').href = ceremony.mapsUrl;
+  $('#receptionName').textContent = reception.name;
+  $('#receptionAddress').textContent = reception.address;
+  $('#receptionMap').href = reception.mapsUrl;
+  $('#dressWomen').textContent = wedding.dressCode.women;
+  $('#dressMen').textContent = wedding.dressCode.men;
   $('#giftMessage').textContent = wedding.giftMessage;
-  $('#adultsMessage').textContent = wedding.adultsOnly;
-  $('#timeline').innerHTML = wedding.itinerary.map((item, index) =>
-    `<div class="timeline-row" style="transition-delay:${index * 90 + 300}ms"><time>${item.time}</time><i aria-hidden="true">${item.icon}</i><span>${item.label}</span></div>`
+  $('#coordinatorName').textContent = wedding.coordinator.name;
+  $('#songTitle').textContent = wedding.music.title;
+  audio.src = wedding.music.src;
+  $('#timeline').innerHTML = wedding.schedule.map((item, index) =>
+    `<div class="timeline-row" style="transition-delay:${index * 100 + 180}ms"><time>${item.time}</time><i aria-hidden="true">♥</i><span>${item.title}</span></div>`
   ).join('');
 }
 
-function revealSite() {
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach((entry) => {
+    if (!entry.isIntersecting) return;
+    entry.target.classList.add('in');
+    if (entry.target.closest('#program')) $('#timeline').classList.add('drawn');
+    observer.unobserve(entry.target);
+  });
+}, { threshold: 0.14, rootMargin: '0px 0px -6% 0px' });
+
+function enterInvitation() {
   opening.classList.add('opened');
   invitation.classList.add('active');
   invitation.setAttribute('aria-hidden', 'false');
@@ -35,32 +49,23 @@ function revealSite() {
   requestAnimationFrame(() => $$('.reveal').forEach((el) => observer.observe(el)));
 }
 
-envelope.addEventListener('click', () => {
-  if (envelope.classList.contains('open')) return;
-  envelope.classList.add('open');
-  setTimeout(revealSite, 1450);
+frame.addEventListener('click', () => {
+  if (frame.classList.contains('open')) return;
+  frame.classList.add('open');
+  setTimeout(enterInvitation, 950);
 });
-
-const observer = new IntersectionObserver((entries) => {
-  entries.forEach((entry) => {
-    if (entry.isIntersecting) {
-      entry.target.classList.add('in');
-      observer.unobserve(entry.target);
-    }
-  });
-}, { threshold: 0.16, rootMargin: '0px 0px -7% 0px' });
 
 async function toggleMusic() {
   if (audio.paused) {
     try {
       await audio.play();
+      musicToggle.textContent = 'Ⅱ';
       musicToggle.setAttribute('aria-pressed', 'true');
-      musicToggle.querySelector('span').textContent = 'Ⅱ';
-    } catch { /* playback remains user-controlled */ }
+    } catch { /* user-controlled playback */ }
   } else {
     audio.pause();
+    musicToggle.textContent = '▶';
     musicToggle.setAttribute('aria-pressed', 'false');
-    musicToggle.querySelector('span').textContent = '▶';
   }
 }
 musicToggle.addEventListener('click', toggleMusic);
@@ -73,18 +78,23 @@ audio.addEventListener('timeupdate', () => {
 
 function updateCountdown() {
   const remaining = Math.max(0, new Date(wedding.date).getTime() - Date.now());
-  const days = Math.floor(remaining / 86400000);
-  const hours = Math.floor((remaining / 3600000) % 24);
-  const minutes = Math.floor((remaining / 60000) % 60);
-  const seconds = Math.floor((remaining / 1000) % 60);
-  $('#days').textContent = String(days).padStart(3, '0');
-  $('#hours').textContent = String(hours).padStart(2, '0');
-  $('#minutes').textContent = String(minutes).padStart(2, '0');
-  $('#seconds').textContent = String(seconds).padStart(2, '0');
+  const values = {
+    days: Math.floor(remaining / 86400000),
+    hours: Math.floor((remaining / 3600000) % 24),
+    minutes: Math.floor((remaining / 60000) % 60),
+    seconds: Math.floor((remaining / 1000) % 60)
+  };
+  Object.entries(values).forEach(([key, value]) => {
+    $(`#${key}`).textContent = String(value).padStart(key === 'days' ? 3 : 2, '0');
+  });
 }
 
 const rsvpForm = $('#rsvpForm');
 $('#showRsvp').addEventListener('click', () => {
+  if (wedding.rsvp.url) {
+    window.open(wedding.rsvp.url, '_blank', 'noopener');
+    return;
+  }
   rsvpForm.hidden = false;
   rsvpForm.scrollIntoView({ behavior: 'smooth', block: 'center' });
   rsvpForm.querySelector('input').focus({ preventScroll: true });
@@ -92,17 +102,25 @@ $('#showRsvp').addEventListener('click', () => {
 $('#closeRsvp').addEventListener('click', () => { rsvpForm.hidden = true; });
 rsvpForm.addEventListener('submit', (event) => {
   event.preventDefault();
-  const data = Object.fromEntries(new FormData(rsvpForm));
+  const raw = Object.fromEntries(new FormData(rsvpForm));
   const clean = (value = '') => String(value).trim().replace(/\s+/g, ' ');
-  const record = { name: clean(data.name), attendance: data.attendance, message: clean(data.message), savedAt: new Date().toISOString() };
+  const record = { name: clean(raw.name), attendance: raw.attendance, guests: Number(raw.guests || 1), dietary: clean(raw.dietary), message: clean(raw.message), savedAt: new Date().toISOString() };
   try {
     const rows = JSON.parse(localStorage.getItem(wedding.rsvp.storageKey) || '[]');
     rows.push(record);
     localStorage.setItem(wedding.rsvp.storageKey, JSON.stringify(rows));
-    $('#rsvpStatus').textContent = 'Your reply has been saved on this device. Thank you.';
+    $('#rsvpStatus').textContent = 'Saved on this device. Please also confirm directly with the couple.';
     rsvpForm.reset();
   } catch {
     $('#rsvpStatus').textContent = 'Please contact the couple directly with your reply.';
+  }
+});
+
+$('#contactButton').addEventListener('click', () => {
+  if (wedding.coordinator.contactUrl) {
+    window.open(wedding.coordinator.contactUrl, '_blank', 'noopener');
+  } else {
+    $('#contactStatus').textContent = 'Contact details will be shared shortly.';
   }
 });
 

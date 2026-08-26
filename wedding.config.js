@@ -1,15 +1,21 @@
 window.WEDDING = {
   couple: { personOne: 'Samir', personTwo: 'Menna' },
   date: '2026-10-23T16:00:00+03:00',
-  ceremony: { time: '4:00 PM', venue: 'Romanica Hall', address: 'Egypt View · Mokattam · Cairo', mapsUrl: 'https://maps.app.goo.gl/9GsbDj4mGxtpF3926?g_st=iw' },
-  song: { title: 'Our wedding song', audioSrc: 'assets/wedding-song.m4a' },
-  itinerary: [
-    { time: '3:30 PM', label: 'Guests arrive', icon: '❧' }, { time: '4:00 PM', label: 'Ceremony', icon: '♙' },
-    { time: '5:00 PM', label: 'Cocktails & photos', icon: '◇' }, { time: '7:00 PM', label: 'Dinner', icon: '♢' },
-    { time: '8:30 PM', label: 'First dance', icon: '♪' }, { time: '9:00 PM', label: 'Celebration', icon: '✦' }
+  venues: {
+    ceremony: { name: 'Romanica Hall', address: 'Egypt View · Mokattam · Cairo', mapsUrl: 'https://maps.app.goo.gl/9GsbDj4mGxtpF3926?g_st=iw' },
+    reception: { name: 'Romanica Hall', address: 'Egypt View · Mokattam · Cairo', mapsUrl: 'https://maps.app.goo.gl/9GsbDj4mGxtpF3926?g_st=iw' }
+  },
+  schedule: [
+    { time: '3:30 PM', title: 'Guest arrival' },
+    { time: '4:00 PM', title: 'Ceremony' },
+    { time: '5:00 PM', title: 'Cocktails & photos' },
+    { time: '7:00 PM', title: 'Dinner reception' },
+    { time: '8:30 PM', title: 'First dance' },
+    { time: '9:00 PM', title: 'Celebration' }
   ],
-  dressCode: 'Come as your most elegant self.',
+  dressCode: { women: 'Burgundy · Wine · Romantic neutrals', men: 'Black · Charcoal · Deep neutrals' },
   giftMessage: 'Your presence and warm wishes are the loveliest gifts we could receive.',
-  adultsOnly: 'With love, we kindly ask that our celebration be enjoyed by adults.',
-  rsvp: { storageKey: 'samir_menna_rsvp_v4' }
+  rsvp: { deadline: '', url: '', storageKey: 'samir_menna_rsvp_v5' },
+  coordinator: { name: 'Wedding Coordinator', contactUrl: '' },
+  music: { title: 'Our wedding song', src: 'assets/wedding-song.m4a' }
 };
