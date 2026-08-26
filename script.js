@@ -7,6 +7,61 @@ const frame = $('#openInvitation');
 const audio = $('#weddingMusic');
 const musicToggle = $('#musicToggle');
 
+function canvasToBlob(canvas) {
+  return new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
+}
+
+async function cleanBakedBackdrops() {
+  const groups = new Map();
+  $$('.alpha-cleanup').forEach((image) => {
+    const source = image.currentSrc || image.src;
+    if (!groups.has(source)) groups.set(source, []);
+    groups.get(source).push(image);
+  });
+
+  await Promise.all([...groups.entries()].map(async ([source, images]) => {
+    try {
+      const sample = images[0];
+      if (!sample.complete) await new Promise((resolve, reject) => {
+        sample.addEventListener('load', resolve, { once: true });
+        sample.addEventListener('error', reject, { once: true });
+      });
+      await sample.decode();
+
+      const canvas = document.createElement('canvas');
+      canvas.width = sample.naturalWidth;
+      canvas.height = sample.naturalHeight;
+      const context = canvas.getContext('2d', { willReadFrequently: true });
+      context.drawImage(sample, 0, 0);
+      const pixels = context.getImageData(0, 0, canvas.width, canvas.height);
+
+      for (let index = 0; index < pixels.data.length; index += 4) {
+        const red = pixels.data[index];
+        const green = pixels.data[index + 1];
+        const blue = pixels.data[index + 2];
+        const low = Math.min(red, green, blue);
+        const high = Math.max(red, green, blue);
+        const chroma = high - low;
+        if (low >= 248 && chroma <= 10) pixels.data[index + 3] = 0;
+        else if (low >= 232 && chroma <= 14) pixels.data[index + 3] = Math.round(255 * (248 - low) / 16);
+      }
+
+      context.putImageData(pixels, 0, 0);
+      const blob = await canvasToBlob(canvas);
+      if (!blob) throw new Error('Could not create transparent artwork.');
+      const cleanSource = URL.createObjectURL(blob);
+      images.forEach((image) => {
+        image.src = cleanSource;
+        image.classList.add('alpha-ready');
+      });
+      const cssVariable = images.find((image) => image.dataset.cssVariable)?.dataset.cssVariable;
+      if (cssVariable) document.documentElement.style.setProperty(cssVariable, `url("${cleanSource}")`);
+    } catch {
+      images.forEach((image) => image.classList.add('alpha-ready', 'alpha-fallback'));
+    }
+  }));
+}
+
 function applyWeddingData() {
   const { personOne, personTwo } = wedding.couple;
   $('#openingNameOne').textContent = personOne;
@@ -125,5 +180,6 @@ $('#contactButton').addEventListener('click', () => {
 });
 
 applyWeddingData();
+cleanBakedBackdrops();
 updateCountdown();
 setInterval(updateCountdown, 1000);
